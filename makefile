@@ -6,11 +6,5 @@ env:
 	poetry shell
 
 requirements:
-	rm -rf .venv
-	rm -f poetry.lock
-	poetry install --without testing,linting
-	poetry shell
-	pip freeze > requirements.txt
-	rm -rf .venv
-	rm -f poetry.lock
+	poetry export --without-hashes --without development,notebooks -f requirements.txt -o requirements.txt
 

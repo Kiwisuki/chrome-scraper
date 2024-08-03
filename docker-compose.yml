@@ -10,4 +10,4 @@ services:
     environment:
       - DRIVER_EXECUTABLE_PATH=/usr/lib/chromium/chromedriver
     volumes:
-      - ./src/scraping_service:/app/src/scraping_service
+      - ./src/scraping_service:/app/src/scraping_service # This removes the need to rebuild the image every time the code changes

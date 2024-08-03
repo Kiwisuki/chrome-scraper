@@ -1,18 +1,20 @@
 #!/bin/sh
+echo "Starting script"
 
+echo "Removing /tmp/.X0-lock"
 rm -f /tmp/.X0-lock
 
-# Run Xvfb on dispaly 0.
+echo "Starting Xvfb on display 0"
 Xvfb :0 -screen 0 1280x720x16 &
 
-# Run fluxbox windows manager on display 0.
+echo "Starting fluxbox window manager on display 0"
 fluxbox -display :0 &
 
-# Run x11vnc on display 0
+echo "Starting x11vnc on display 0"
 x11vnc -display :0 -forever -usepw &
 
-# Add delay
-sleep 5
+echo "Adding delay of 30 seconds"
+sleep 30
 
-# Run python script
+echo "Starting uvicorn server"
 uvicorn src.scraping_service.app:app --host 0.0.0.0 --port 8000

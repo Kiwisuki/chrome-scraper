@@ -17,9 +17,7 @@ app = FastAPI(lifespan=lifespan)
 async def scrape(request: ScrapeRequest):
     """Scrape the given URL and return the HTML content."""
     try:
-        html = app.timed_driver.get_html(str(request.url))
-        if html == "<html><head></head><body></body></html>":
-            raise Exception("Proxy authentication failed.")
+        html = await app.timed_driver.get_html(str(request.url))
     except Exception as error:
         raise HTTPException(status_code=400, detail=str(error)) from error
     return ScrapeResponse(url=request.url, html=html)
@@ -29,7 +27,7 @@ async def scrape(request: ScrapeRequest):
 async def search(request: SearchRequest):
     """Search the given query on Google and return the search results."""
     try:
-        results = app.timed_driver.search_google(request.query)
+        results = await app.timed_driver.search_google(request.query)
     except Exception as error:
         raise HTTPException(status_code=400, detail=str(error)) from error
     return results
