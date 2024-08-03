@@ -10,7 +10,12 @@ logging.basicConfig(
     handlers=[logging.StreamHandler()],
 )
 
-if load_dotenv():
-    LOGGER.info(f"Loaded .env file")
-else:
-    LOGGER.warning("No .env file found, this is expected if running via Docker.")
+try:
+    from dotenv import load_dotenv
+
+    if load_dotenv():
+        LOGGER.info(f"Loaded .env file")
+    else:
+        LOGGER.warning(f"Failed to load .env file")
+except ImportError:
+    LOGGER.warning("Failed to load .env file, expected if running via docker")

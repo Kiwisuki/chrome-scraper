@@ -1,7 +1,7 @@
 import logging
 import os
 import time
-from typing import List
+from typing import List, Optional
 
 import nodriver as uc
 from bs4 import BeautifulSoup
@@ -10,7 +10,7 @@ from retry import retry
 from src.scraping_service.helpers.schemas import SearchResult
 
 LOGGER = logging.getLogger(__name__)
-PROXY_ADDRESS = os.environ["PROXY_ADDRESS"]
+PROXY_ADDRESS = os.getenv("PROXY_ADDRESS", None)
 
 
 class TimedDriver:
@@ -20,7 +20,7 @@ class TimedDriver:
     def __init__(
         self,
         *,
-        proxy_address: str = PROXY_ADDRESS,
+        proxy_address: Optional[str] = PROXY_ADDRESS,
         refresh_rate: int = 1_000,
         refresh_timer: int = 3_600,
         wait_to_load: int = 5,
@@ -40,7 +40,6 @@ class TimedDriver:
     def _get_options(self):
         """Get the options for the chromedriver."""
         options = [
-            f"--proxy-server={self.proxy_address}",
             "--blink-settings=imagesEnabled=false",
             "--disable-background-networking",
             "--disable-blink-features=AutomationControlled",
@@ -55,7 +54,8 @@ class TimedDriver:
             "--remote-allow-origins=*",
             "--start-maximized",
         ]
-
+        if self.proxy_address:
+            options.append(f"--proxy-server={self.proxy_address}")
         return options
 
     async def _initialize_browser(self):
