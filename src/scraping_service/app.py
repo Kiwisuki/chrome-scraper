@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 
 from fastapi import FastAPI, HTTPException
 
@@ -13,7 +13,7 @@ from src.scraping_service.helpers.schemas import (
 app = FastAPI(lifespan=lifespan)
 
 
-@app.get("/ai/scrape", response_model=ScrapeResponse)
+@app.get("/scrape", response_model=ScrapeResponse)
 async def scrape(request: ScrapeRequest):
     """Scrape the given URL and return the HTML content."""
     try:
@@ -23,7 +23,7 @@ async def scrape(request: ScrapeRequest):
     return ScrapeResponse(url=request.url, html=html)
 
 
-@app.get("/ai/search", response_model=List[SearchResult])
+@app.get("/search", response_model=List[SearchResult])
 async def search(request: SearchRequest):
     """Search the given query on Google and return the search results."""
     try:
@@ -31,3 +31,9 @@ async def search(request: SearchRequest):
     except Exception as error:
         raise HTTPException(status_code=400, detail=str(error)) from error
     return results
+
+@app.get("/health", response_model=Dict[str, str])
+async def health_check():
+    """Health check endpoint to determine if the service is running."""
+    return {"STATUS": "OK", "MESSAGE": "Service is running."}
+
