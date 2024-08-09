@@ -17,10 +17,3 @@ repos:
     hooks:
       - id: check-merge-conflict
       - id: trailing-whitespace
--   repo: local
-    hooks:
-    -   id: pytest
-        name: pytest
-        language: system
-        entry: pytest
-        pass_filenames: false
