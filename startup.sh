@@ -13,7 +13,7 @@ fluxbox -display :0 &
 echo "Starting x11vnc on display 0"
 x11vnc -display :0 -forever -usepw &
 
-echo "Adding delay of 30 seconds"
+echo "Adding delay of 30 seconds" # Required to give time for Xvfb, fluxbox and x11vnc to start
 sleep 30
 
 echo "Starting uvicorn server"
