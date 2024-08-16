@@ -37,7 +37,9 @@ class TimedDriver:
 
     async def initialize(self):
         """Initialize the browser."""
-        await self._initialize_browser()
+        options = self._get_options()
+        self.browser = await uc.start(browser_args=options)
+        await self.browser.get("https://example.com/")
 
     def _get_options(self):
         """Get the options for the chromedriver."""
@@ -60,11 +62,6 @@ class TimedDriver:
             options.append(f"--proxy-server={self.proxy_address}")
         return options
 
-    async def _initialize_browser(self):
-        """Initialize the chromedriver."""
-        options = self._get_options()
-        self.browser = await uc.start(browser_args=options)
-
     async def _refresh(self):
         """Refresh the chromedriver."""
         self.browser.stop()
@@ -84,10 +81,10 @@ class TimedDriver:
     @retry(Exception, tries=3, delay=2, backoff=2, logger=LOGGER)
     async def get_html(self, url: str) -> str:
         """Get the html content from the url."""
-        tab = await self.browser.get(url, new_tab=True)
-        time.sleep(self.wait_to_load)
+        tab = await self.browser.get(url, new_window=True, new_tab=True)
+        await tab.wait(self.wait_to_load)
         html_content = await tab.get_content()
-        tab.close()
+        await tab.close()
         self._increment()
         return html_content
 
