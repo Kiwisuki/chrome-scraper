@@ -21,12 +21,14 @@ class TimedDriver:
         self,
         *,
         proxy_address: Optional[str] = PROXY_ADDRESS,
+        refresh_enabled: bool = False,
         refresh_rate: int = 1_000,
         refresh_timer: int = 3_600,
         wait_to_load: int = 5,
     ):
         """Initialize the driver with a refresh rate and timer."""
         self.actions = 0
+        self.refresh_enabled = refresh_enabled
         self.last_refresh = time.time()
         self.refresh_rate = refresh_rate
         self.refresh_timer = refresh_timer
@@ -71,6 +73,8 @@ class TimedDriver:
 
     def _increment(self):
         """Increments the actions and refreshes if needed."""
+        if not self.refresh_enabled:
+            return
         self.actions += 1
         if (self.actions % self.refresh_rate == 0) or (
             time.time() - self.last_refresh > self.refresh_timer
@@ -80,9 +84,10 @@ class TimedDriver:
     @retry(Exception, tries=3, delay=2, backoff=2, logger=LOGGER)
     async def get_html(self, url: str) -> str:
         """Get the html content from the url."""
-        page = await self.browser.get(url)
+        tab = await self.browser.get(url, new_tab=True)
         time.sleep(self.wait_to_load)
-        html_content = await page.get_content()
+        html_content = await tab.get_content()
+        tab.close()
         self._increment()
         return html_content
 

@@ -1,5 +1,5 @@
 services:
-  chrome_scraper:
+  scraping_service:
     build:
       context: .
       dockerfile: Dockerfile
@@ -7,5 +7,3 @@ services:
       - "8000:8000"
     env_file:
       - .env
-    environment:
-      - DRIVER_EXECUTABLE_PATH=/usr/lib/chromium/chromedriver
