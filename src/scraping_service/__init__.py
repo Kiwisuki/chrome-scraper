@@ -12,6 +12,10 @@ logging.basicConfig(
 
 try:
     from dotenv import load_dotenv
-    assert load_dotenv(), "Failed to load .env file, did you create .env file?"
+
+    if load_dotenv():
+        LOGGER.info("Loaded .env file")
+    else:
+        LOGGER.warning("Failed to load .env file, no .env file found")
 except ImportError:
-    LOGGER.warning("Failed to load .env file, expected if running via docker")
+    LOGGER.warning("Failed to load .env file, python-dotenv not installed")

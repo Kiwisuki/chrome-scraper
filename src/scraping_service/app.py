@@ -1,4 +1,5 @@
 import asyncio
+import os
 from typing import Dict, List
 
 from fastapi import Depends, FastAPI, HTTPException
@@ -11,8 +12,10 @@ from src.scraping_service.helpers.schemas import (
     SearchResult,
 )
 
+CONCURRENCY_LIMIT = int(os.getenv("CONCURRENCY_LIMIT", 5))
+
 app = FastAPI(lifespan=lifespan)
-request_semaphore = asyncio.Semaphore(5)
+request_semaphore = asyncio.Semaphore(CONCURRENCY_LIMIT)
 
 
 async def get_semaphore():

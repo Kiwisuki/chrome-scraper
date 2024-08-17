@@ -11,6 +11,11 @@ from src.scraping_service.helpers.schemas import SearchResult
 
 LOGGER = logging.getLogger(__name__)
 PROXY_ADDRESS = os.getenv("PROXY_ADDRESS", None)
+BYPASS_LIST = [
+    "edgedl.me.gvt1.com",
+    "optimizationguide-pa.googleapis.com",
+    "https://example.com/",
+]
 
 
 class TimedDriver:
@@ -21,19 +26,14 @@ class TimedDriver:
         self,
         *,
         proxy_address: Optional[str] = PROXY_ADDRESS,
-        refresh_enabled: bool = False,
-        refresh_rate: int = 1_000,
-        refresh_timer: int = 3_600,
+        bypass_list: List[str] = BYPASS_LIST,
         wait_to_load: int = 5,
     ):
         """Initialize the driver with a refresh rate and timer."""
-        self.actions = 0
-        self.refresh_enabled = refresh_enabled
         self.last_refresh = time.time()
-        self.refresh_rate = refresh_rate
-        self.refresh_timer = refresh_timer
-        self.wait_to_load = wait_to_load
         self.proxy_address = proxy_address
+        self.bypass_list = bypass_list
+        self.wait_to_load = wait_to_load
 
     async def initialize(self):
         """Initialize the browser."""
@@ -57,26 +57,11 @@ class TimedDriver:
             "--incognito",
             "--remote-allow-origins=*",
             "--start-maximized",
+            "--proxy-bypass-list=" + ",".join(self.bypass_list),
         ]
         if self.proxy_address:
             options.append(f"--proxy-server={self.proxy_address}")
         return options
-
-    async def _refresh(self):
-        """Refresh the chromedriver."""
-        self.browser.stop()
-        await self._initialize_browser()
-        self.last_refresh = time.time()
-
-    def _increment(self):
-        """Increments the actions and refreshes if needed."""
-        if not self.refresh_enabled:
-            return
-        self.actions += 1
-        if (self.actions % self.refresh_rate == 0) or (
-            time.time() - self.last_refresh > self.refresh_timer
-        ):
-            self._refresh()
 
     @retry(Exception, tries=3, delay=2, backoff=2, logger=LOGGER)
     async def get_html(self, url: str) -> str:

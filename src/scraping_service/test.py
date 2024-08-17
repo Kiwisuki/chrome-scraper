@@ -19,7 +19,9 @@ async def web_search(
     body = {"query": query}
     LOGGER.info(f"Searching the web for: {query}, using service: {search_service_url}")
     async with session.get(search_service_url, json=body) as response:
-        return await response.json(content_type=None)
+        result = await response.json(content_type=None)
+        LOGGER.info(f"Received search results for: {query}")
+        return result
 
 
 async def perform_searches(queries: List[str]) -> List[List[Dict[str, str]]]:
@@ -36,6 +38,9 @@ async def main():
         "Python async web scraping",
         "AI advances in 2024",
         "Latest trends in machine learning",
+        "Web development frameworks comparison",
+        "How to build a chatbot",
+        "Quantum computing applications",
     ]
 
     # Perform the searches

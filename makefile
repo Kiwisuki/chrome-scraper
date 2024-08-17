@@ -6,5 +6,5 @@ env:
 	poetry shell
 
 requirements:
-	poetry export --without-hashes --without development,notebooks -f requirements.txt -o requirements.txt
+	poetry export --without-hashes --without development -f requirements.txt -o requirements.txt
 
