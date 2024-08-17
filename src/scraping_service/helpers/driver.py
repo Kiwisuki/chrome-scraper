@@ -14,13 +14,14 @@ PROXY_ADDRESS = os.getenv("PROXY_ADDRESS", None)
 BYPASS_LIST = [
     "edgedl.me.gvt1.com",
     "optimizationguide-pa.googleapis.com",
+    "accounts.google.com",
     "https://example.com/",
 ]
 
 
-class TimedDriver:
+class DriverClient:
 
-    """Driver that resets itself after a certain amount of actions or time passed."""
+    """A class to manage the browser driver and perform web scraping."""
 
     def __init__(
         self,
@@ -66,11 +67,10 @@ class TimedDriver:
     @retry(Exception, tries=3, delay=2, backoff=2, logger=LOGGER)
     async def get_html(self, url: str) -> str:
         """Get the html content from the url."""
-        tab = await self.browser.get(url, new_window=True, new_tab=True)
+        tab = await self.browser.get(url, new_window=True)
         await tab.wait(self.wait_to_load)
         html_content = await tab.get_content()
         await tab.close()
-        self._increment()
         return html_content
 
     @staticmethod
