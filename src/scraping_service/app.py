@@ -32,7 +32,7 @@ async def get_semaphore():
 @handle_errors
 async def scrape(request: ScrapeRequest):
     """Scrape the given URL and return the HTML content."""
-    html = await app.timed_driver.get_html(str(request.url))
+    html = await app.driver_client.get_html(str(request.url))
     return ScrapeResponse(url=request.url, html=html)
 
 
@@ -42,7 +42,7 @@ async def scrape(request: ScrapeRequest):
 @handle_errors
 async def search(request: SearchRequest):
     """Search the given query on Google and return the search results."""
-    results = await app.timed_driver.search_google(request.query)
+    results = await app.driver_client.search_google(request.query)
     return results
 
 

@@ -13,11 +13,10 @@ async def lifespan(app: FastAPI):
     """Manage resources during the lifespan of the application."""
     # Set up
     LOGGER.info("Setting up timed driver.")
-    app.timed_driver = DriverClient()
-    await app.timed_driver.initialize()
+    app.driver_client = DriverClient()
+    await app.driver_client.initialize()
     LOGGER.info("Driver setup complete.")
     yield
     # Clean up
-    LOGGER.info("Quitting the driver.")
-    app.timed_driver.driver.quit()
-    del app.timed_driver
+    app.driver_client.close()
+    LOGGER.info("Driver quit.")

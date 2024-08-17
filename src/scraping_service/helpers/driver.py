@@ -42,6 +42,10 @@ class DriverClient:
         self.browser = await uc.start(browser_args=options)
         await self.browser.get("https://example.com/")
 
+    async def close(self):
+        """Close the browser."""
+        await self.browser.stop()
+
     def _get_options(self):
         """Get the options for the chromedriver."""
         options = [
@@ -51,14 +55,16 @@ class DriverClient:
             "--disable-component-extensions-with-background-pages",
             "--disable-component-update",
             "--disable-default-apps",
+            "--disable-dev-shm-usage",
             "--disable-extensions",
             "--disable-features=OptimizationGuideModelDownloading,OptimizationHintsFetching,OptimizationTargetPrediction,OptimizationHints",
+            "--disable-gpu",
             "--disable-sync",
             "--ignore-certificate-errors",
             "--incognito",
+            "--proxy-bypass-list=" + ",".join(self.bypass_list),
             "--remote-allow-origins=*",
             "--start-maximized",
-            "--proxy-bypass-list=" + ",".join(self.bypass_list),
         ]
         if self.proxy_address:
             options.append(f"--proxy-server={self.proxy_address}")
