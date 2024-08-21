@@ -35,12 +35,12 @@ async def perform_searches(queries: List[str]) -> List[List[Dict[str, str]]]:
 async def main():
     # Define the search queries
     queries = [
-        "Python async web scraping",
-        "AI advances in 2024",
-        "Latest trends in machine learning",
-        "Web development frameworks comparison",
-        "How to build a chatbot",
-        "Quantum computing applications",
+        "Python",
+        "AI",
+        "ML",
+        "Docker",
+        "Kubernetes",
+        "Rust",
     ]
 
     # Perform the searches

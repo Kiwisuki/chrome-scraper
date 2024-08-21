@@ -17,6 +17,7 @@ BYPASS_LIST = [
     "accounts.google.com",
     "https://example.com/",
 ]
+SEARCH_QUERY_FORMAT = "https://www.google.com/search?q={query}"
 
 
 class DriverClient:
@@ -104,8 +105,19 @@ class DriverClient:
 
         return results
 
-    async def search_google(self, query: str) -> List[SearchResult]:
-        """Search Google and return a list of SearchResult objects."""
+    async def search_google(self, query: str, search_query_format: str = SEARCH_QUERY_FORMAT) -> List[SearchResult]:
+        """Search Google and return a list of SearchResult objects.
+
+        Args:
+            query (str): The search query.
+            search_query_format (str): The search query format, should contain a {query} placeholder.
+
+        Returns:
+            List[SearchResult]: A list of SearchResult objects.
+        """
         LOGGER.info(f"Searching Google for '{query[:20]}'...")
-        search_results = await self.get_html(f"https://www.google.com/search?q={query}")
+        search_results = await self.get_html(search_query_format.format(query=query))
+        from src.scraping_service import TEST_PATH
+        with open(TEST_PATH / "test_data" / f"search_{query}.html", "w") as file:
+            file.write(search_results)
         return self._parse_google_search(search_results)
