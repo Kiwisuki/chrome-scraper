@@ -1,6 +1,6 @@
+# flake8: noqa
 import asyncio
 import logging
-from typing import Dict, List
 
 import aiohttp
 
@@ -14,7 +14,7 @@ async def web_search(
     session: aiohttp.ClientSession,
     query: str,
     search_service_url: str = SEARCH_SERVICE_URL,
-) -> List[Dict[str, str]]:
+) -> list[dict[str, str]]:
     """Search the web for a given query asynchronously."""
     body = {"query": query}
     LOGGER.info(f"Searching the web for: {query}, using service: {search_service_url}")
@@ -24,12 +24,11 @@ async def web_search(
         return result
 
 
-async def perform_searches(queries: List[str]) -> List[List[Dict[str, str]]]:
+async def perform_searches(queries: list[str]) -> list[list[dict[str, str]]]:
     """Perform multiple web searches asynchronously."""
     async with aiohttp.ClientSession() as session:
         tasks = [web_search(session, query) for query in queries]
-        results = await asyncio.gather(*tasks)
-        return results
+        return await asyncio.gather(*tasks)
 
 
 async def main():

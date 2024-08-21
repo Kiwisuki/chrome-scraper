@@ -1,8 +1,6 @@
 import logging
 from pathlib import Path
 
-from dotenv import load_dotenv
-
 TEST_PATH = Path(__file__).parents[1] / "tests"
 LOGGER = logging.getLogger(__name__)
 
