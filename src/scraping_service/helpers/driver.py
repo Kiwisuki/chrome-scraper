@@ -1,7 +1,6 @@
 import logging
 import os
 import time
-from typing import List, Optional
 
 import nodriver as uc
 from bs4 import BeautifulSoup
@@ -21,33 +20,32 @@ SEARCH_QUERY_FORMAT = "https://www.google.com/search?q={query}"
 
 
 class DriverClient:
-
     """A class to manage the browser driver and perform web scraping."""
 
     def __init__(
         self,
         *,
-        proxy_address: Optional[str] = PROXY_ADDRESS,
-        bypass_list: List[str] = BYPASS_LIST,
+        proxy_address: str | None = PROXY_ADDRESS,
+        bypass_list: list[str] = BYPASS_LIST,
         wait_to_load: int = 5,
-    ):
+    ) -> None:
         """Initialize the driver with a refresh rate and timer."""
         self.last_refresh = time.time()
         self.proxy_address = proxy_address
         self.bypass_list = bypass_list
         self.wait_to_load = wait_to_load
 
-    async def initialize(self):
+    async def initialize(self) -> None:
         """Initialize the browser."""
         options = self._get_options()
         self.browser = await uc.start(browser_args=options)
         await self.browser.get("https://example.com/")
 
-    async def close(self):
+    async def close(self) -> None:
         """Close the browser."""
         await self.browser.stop()
 
-    def _get_options(self):
+    def _get_options(self) -> list[str]:
         """Get the options for the chromedriver."""
         options = [
             "--blink-settings=imagesEnabled=false",
@@ -72,21 +70,22 @@ class DriverClient:
         return options
 
     @retry(Exception, tries=3, delay=2, backoff=2, logger=LOGGER)
-    async def get_html(self, url: str) -> str:
+    async def get_html(self, url: str, wait_to_load: int | None = None) -> str:
         """Get the html content from the url."""
         tab = await self.browser.get(url, new_window=True)
-        await tab.wait(self.wait_to_load)
+        await tab.wait(wait_to_load or self.wait_to_load)
         html_content = await tab.get_content()
         await tab.close()
         return html_content
 
     @staticmethod
-    def _parse_google_search(html_content: str) -> List[SearchResult]:
+    def _parse_google_search(html_content: str) -> list[SearchResult]:
         """Parse HTML content and return a list of SearchResult objects."""
         results = []
         soup = BeautifulSoup(html_content, "html.parser")
         result_soup = soup.find(
-            "div", attrs={"id": "res"}
+            "div",
+            attrs={"id": "res"},
         )  # Filter out Sponsored results
         result_blocks = result_soup.find_all("div", attrs={"class": "g"})
 
@@ -100,17 +99,23 @@ class DriverClient:
                 title_text = title.text
                 description = description_box.text
                 results.append(
-                    SearchResult(url=url, title=title_text, description=description)
+                    SearchResult(url=url, title=title_text, description=description),
                 )
 
         return results
 
-    async def search_google(self, query: str, search_query_format: str = SEARCH_QUERY_FORMAT) -> List[SearchResult]:
+    async def search_google(
+        self,
+        query: str,
+        wait_to_load: int | None = None,
+        search_query_format: str = SEARCH_QUERY_FORMAT,
+    ) -> list[SearchResult]:
         """Search Google and return a list of SearchResult objects.
 
         Args:
         ----
             query (str): The search query.
+            wait_to_load (int): The time to wait for the page to load.
             search_query_format (str): The search query format, should contain a {query} placeholder.
 
         Returns:
@@ -118,8 +123,8 @@ class DriverClient:
             List[SearchResult]: A list of SearchResult objects.
         """
         LOGGER.info(f"Searching Google for '{query[:20]}'...")
-        search_results = await self.get_html(search_query_format.format(query=query))
-        from src.scraping_service import TEST_PATH
-        with open(TEST_PATH / "test_data" / f"search_{query}.html", "w") as file:
-            file.write(search_results)
+        search_results = await self.get_html(
+            search_query_format.format(query=query),
+            wait_to_load,
+        )
         return self._parse_google_search(search_results)
