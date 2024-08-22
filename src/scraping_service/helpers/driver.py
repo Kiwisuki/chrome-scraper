@@ -109,10 +109,12 @@ class DriverClient:
         """Search Google and return a list of SearchResult objects.
 
         Args:
+        ----
             query (str): The search query.
             search_query_format (str): The search query format, should contain a {query} placeholder.
 
         Returns:
+        -------
             List[SearchResult]: A list of SearchResult objects.
         """
         LOGGER.info(f"Searching Google for '{query[:20]}'...")

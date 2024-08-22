@@ -18,12 +18,12 @@ TEST_FILENAMES = [
 FILE_PATHS = [TEST_DATA_PATH / filename for filename in TEST_FILENAMES]
 
 
-@pytest.fixture
+@pytest.fixture()
 def htmls():
     return [file_path.read_text() for file_path in FILE_PATHS]
 
 
-@pytest.fixture
+@pytest.fixture()
 async def driver():
     driver = DriverClient()
     await driver.initialize()
@@ -31,12 +31,12 @@ async def driver():
     await driver.close()
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_initialize_driver(driver):
     assert isinstance(driver.browser, Browser)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_get_html(driver, htmls):
     for original_html, path in zip(htmls, FILE_PATHS):
         # use file htmls to fetch through driver
