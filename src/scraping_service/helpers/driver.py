@@ -39,7 +39,6 @@ class DriverClient:
         """Initialize the browser."""
         options = self._get_options()
         self.browser = await uc.start(browser_args=options)
-        await self.browser.get("https://example.com/")
 
     async def close(self) -> None:
         """Close the browser."""
@@ -113,13 +112,11 @@ class DriverClient:
         """Search Google and return a list of SearchResult objects.
 
         Args:
-        ----
             query (str): The search query.
             wait_to_load (int): The time to wait for the page to load.
             search_query_format (str): The search query format, should contain a {query} placeholder.
 
         Returns:
-        -------
             List[SearchResult]: A list of SearchResult objects.
         """
         LOGGER.info(f"Searching Google for '{query[:20]}'...")

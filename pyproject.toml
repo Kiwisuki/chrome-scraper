@@ -23,9 +23,6 @@ pytest = "^8.2.2"
 pytest-asyncio = "^0.23.8"
 python-dotenv = "^1.0.1"
 
-[tool.poetry.group.notebooks.dependencies]
-
-
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
@@ -52,6 +49,7 @@ ignore = [
     "ANN003", # missing type annotation for kwarg
     "S101", # use of assert
     "INP001", # missing __init__.py in package
+    "SLF001", # access to a private member (for tests only)
 ]
 
 [tool.ruff.flake8-quotes]
