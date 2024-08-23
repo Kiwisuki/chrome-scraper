@@ -13,7 +13,6 @@ fastapi = "^0.111.1"
 uvicorn = "^0.30.1"
 beautifulsoup4 = "^4.12.3"
 nodriver = "^0.34"
-aiohttp = "^3.10.3"
 
 [tool.poetry.group.development.dependencies]
 ruff = '^0.0.285'
