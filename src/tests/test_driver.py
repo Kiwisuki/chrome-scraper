@@ -3,7 +3,6 @@ from pathlib import Path
 
 import pytest
 from nodriver import Browser
-
 from src.scraping_service.helpers.driver import DriverClient
 from src.scraping_service.helpers.schemas import SearchResult
 
