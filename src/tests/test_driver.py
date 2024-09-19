@@ -3,8 +3,9 @@ from pathlib import Path
 
 import pytest
 from nodriver import Browser
-from src.scraping_service.helpers.driver import DriverClient
-from src.scraping_service.helpers.schemas import SearchResult
+
+from scraping_service.helpers.driver import DriverClient
+from scraping_service.helpers.schemas import SearchResult
 
 TEST_DATA_PATH = Path(__file__).parent / "test_data"
 SEARCH_FILENAMES = [

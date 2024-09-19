@@ -4,11 +4,15 @@ import os
 from collections.abc import AsyncGenerator
 
 from fastapi import Depends, FastAPI
-from src.scraping_service.helpers.error_handling import handle_errors
-from src.scraping_service.helpers.lifespan import lifespan
-from src.scraping_service.helpers.schemas import (ScrapeRequest,
-                                                  ScrapeResponse,
-                                                  SearchRequest, SearchResult)
+
+from scraping_service.helpers.error_handling import handle_errors
+from scraping_service.helpers.lifespan import lifespan
+from scraping_service.helpers.schemas import (
+    ScrapeRequest,
+    ScrapeResponse,
+    SearchRequest,
+    SearchResult,
+)
 
 LOGGER = logging.getLogger(__name__)
 CONCURRENCY_LIMIT = int(os.getenv("CONCURRENCY_LIMIT", "5"))

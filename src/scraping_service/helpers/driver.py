@@ -5,7 +5,8 @@ import time
 import nodriver as uc
 from bs4 import BeautifulSoup
 from retry import retry
-from src.scraping_service.helpers.schemas import SearchResult
+
+from scraping_service.helpers.schemas import SearchResult
 
 LOGGER = logging.getLogger(__name__)
 PROXY_ADDRESS = os.getenv("PROXY_ADDRESS", None)
