@@ -5,7 +5,7 @@ EXPOSE 8000
 WORKDIR /app
 
 COPY requirements.txt .
-COPY src/scraping_service /app/src/scraping_service
+COPY src/scraping_service /app/scraping_service
 COPY startup.sh .
 
 # Install Python dependencies

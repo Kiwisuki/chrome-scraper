@@ -14,4 +14,4 @@ echo "Starting x11vnc on display 0"
 x11vnc -display :0 -forever -usepw &
 
 echo "Starting uvicorn server"
-uvicorn src.scraping_service.app:app --host 0.0.0.0 --port 8000
+uvicorn scraping_service.app:app --host 0.0.0.0 --port 8000
