@@ -17,3 +17,15 @@ repos:
     hooks:
       - id: check-merge-conflict
       - id: trailing-whitespace
+-   repo: local
+    hooks:
+    -   id: docker-build
+        name: Docker Build
+        entry: bash -c "docker build -t kiwisaki/redp:scraping-service ."
+        language: system
+        pass_filenames: false
+    -   id: docker-push
+        name: Docker Push
+        entry: bash -c "docker push kiwisaki/redp:scraping-service"
+        language: system
+        pass_filenames: false

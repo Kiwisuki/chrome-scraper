@@ -50,4 +50,4 @@ ENV DISPLAY=:0
 # Delete temporary dependencies
 RUN apk del .build-deps
 
-CMD sh startup.sh
+CMD ["sh", "startup.sh"]
