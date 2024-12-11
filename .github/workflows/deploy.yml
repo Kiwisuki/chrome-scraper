@@ -40,26 +40,44 @@ jobs:
 
     - name: Run Deployment on Desktop
       run: |
+        # Extract the repository name dynamically
+        REPO_NAME=$(basename $GITHUB_REPOSITORY)
+
         # SSH into the local desktop and deploy the application
-        ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-          # Navigate to the Desktop directory (update this if different on your machine)
-          cd /home/${{ secrets.SSH_USER }}/Desktop || exit 1
-          
-          # Move the generated .env file to the project directory on the Desktop
+        ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << EOF
+          # Ensure we're in the correct directory on the Desktop
+          cd /home/${{ secrets.SSH_USER }}/Desktop/$REPO_NAME || exit 1
+
+          # If the repository isn't cloned, clone it
+          if [ ! -d "$REPO_NAME" ]; then
+            echo "Cloning repository..."
+            git clone https://github.com/$GITHUB_REPOSITORY.git || exit 1
+          fi
+
+          # Change into the project directory
+          cd /home/${{ secrets.SSH_USER }}/Desktop/$REPO_NAME || exit 1
+
+          # Move the generated .env file to the correct directory
           echo "$(< .env)" > .env
-          
+
           # Print the .env file (for debugging purposes, remove this in production)
           cat .env
-          
-          # Pull the latest changes from the repo (if using git on the desktop)
+
+          # Ensure we're in a Git repository before trying to pull
+          if [ ! -d ".git" ]; then
+            echo "Not a Git repository. Please check if the repository is cloned correctly."
+            exit 1
+          fi
+
+          # Pull the latest changes from the repo
           git pull origin main || exit 1
-          
+
           # Pull the latest Docker images
           docker-compose pull || exit 1
-          
-          # Restart the services (this ensures any new changes are picked up)
+
+          # Restart the services
           docker-compose up -d --remove-orphans || exit 1
-          
-          # Optionally: Clean up unused Docker images
+
+          # Clean up unused Docker images
           docker system prune -f || exit 1
         EOF
