@@ -73,10 +73,10 @@ jobs:
           git pull origin main || exit 1
 
           # Pull the latest Docker images
-          docker-compose pull || exit 1
+          docker compose pull || exit 1
 
           # Restart the services
-          docker-compose up -d --remove-orphans || exit 1
+          docker compose up -d --remove-orphans || exit 1
 
           # Clean up unused Docker images
           docker system prune -f || exit 1
