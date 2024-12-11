@@ -8,7 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest  # GitHub Actions runner will run on an Ubuntu machine
-
+    environment: test
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v3
