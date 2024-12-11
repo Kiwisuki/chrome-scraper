@@ -7,8 +7,9 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest  # GitHub Actions runner will run on an Ubuntu machine
-    environment: test
+    runs-on: ubuntu-latest
+    environment: test  # Specify the correct environment here
+
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v3
@@ -17,6 +18,11 @@ jobs:
       uses: webfactory/ssh-agent@v0.5.3
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Debug SSH details
+      run: |
+        echo "SSH_USER: ${{ secrets.SSH_USER }}"
+        echo "SERVER_IP: ${{ secrets.SERVER_IP }}"
 
     - name: Generate .env file with all GitHub Actions environment variables
       run: |
@@ -35,7 +41,7 @@ jobs:
     - name: Run Deployment on Desktop
       run: |
         # SSH into the local desktop and deploy the application
-        ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.DESKTOP_IP }} << 'EOF'
+        ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
           # Navigate to the Desktop directory (update this if different on your machine)
           cd /home/${{ secrets.SSH_USER }}/Desktop || exit 1
           
