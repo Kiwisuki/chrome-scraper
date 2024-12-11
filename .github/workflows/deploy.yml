@@ -45,16 +45,16 @@ jobs:
 
         # SSH into the local desktop and deploy the application
         ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << EOF
-          # Ensure we're in the correct directory on the Desktop
-          cd /home/${{ secrets.SSH_USER }}/Desktop/$REPO_NAME || exit 1
+          # Navigate to the Desktop folder
+          cd /home/${{ secrets.SSH_USER }}/Desktop || exit 1
 
-          # If the repository isn't cloned, clone it
+          # If the directory for the repository does not exist, clone the repo
           if [ ! -d "$REPO_NAME" ]; then
             echo "Cloning repository..."
-            git clone https://github.com/$GITHUB_REPOSITORY.git || exit 1
+            git clone https://github.com/$GITHUB_REPOSITORY.git $REPO_NAME || exit 1
           fi
 
-          # Change into the project directory
+          # Change into the repository directory
           cd /home/${{ secrets.SSH_USER }}/Desktop/$REPO_NAME || exit 1
 
           # Move the generated .env file to the correct directory
