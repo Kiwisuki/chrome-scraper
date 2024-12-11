@@ -1,0 +1,59 @@
+name: Deploy to Desktop with Docker Compose
+
+on:
+  push:
+    branches:
+      - main  # Adjust this to your default branch name if it's different (e.g., master)
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest  # GitHub Actions runner will run on an Ubuntu machine
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set up SSH key for authentication
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Generate .env file with all GitHub Actions environment variables
+      run: |
+        echo "Generating .env file with all environment variables"
+        # Create .env file
+        echo "Generating .env file from GitHub Actions environment variables"
+
+        # Loop over all environment variables and write them to the .env file
+        for var in $(printenv | cut -d= -f1); do
+          echo "$var=${!var}" >> .env
+        done
+
+        # Print the .env file (for debugging purposes)
+        cat .env
+
+    - name: Run Deployment on Desktop
+      run: |
+        # SSH into the local desktop and deploy the application
+        ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.DESKTOP_IP }} << 'EOF'
+          # Navigate to the Desktop directory (update this if different on your machine)
+          cd /home/${{ secrets.SSH_USER }}/Desktop || exit 1
+          
+          # Move the generated .env file to the project directory on the Desktop
+          echo "$(< .env)" > .env
+          
+          # Print the .env file (for debugging purposes, remove this in production)
+          cat .env
+          
+          # Pull the latest changes from the repo (if using git on the desktop)
+          git pull origin main || exit 1
+          
+          # Pull the latest Docker images
+          docker-compose pull || exit 1
+          
+          # Restart the services (this ensures any new changes are picked up)
+          docker-compose up -d --remove-orphans || exit 1
+          
+          # Optionally: Clean up unused Docker images
+          docker system prune -f || exit 1
+        EOF
