@@ -15,7 +15,7 @@ services:
       - web
     labels:
       traefik.enable: "true"
-      traefik.http.routers.adguard.rule: Host(`scraper.kiwisaki.com`)
-      traefik.http.routers.adguard.entrypoints: websecure
-      traefik.http.routers.adguard.tls.certresolver: myresolver
-      traefik.http.services.adguard.loadbalancer.server.port: 8000
+      traefik.http.routers.scraping_service.rule: Host(`scraper.kiwisaki.com`)
+      traefik.http.routers.scraping_service.entrypoints: websecure
+      traefik.http.routers.scraping_service.tls.certresolver: myresolver
+      traefik.http.services.scraping_service.loadbalancer.server.port: 8000
