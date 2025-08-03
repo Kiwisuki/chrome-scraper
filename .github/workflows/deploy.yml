@@ -3,81 +3,58 @@ name: Deploy to Desktop with Docker Compose
 on:
   push:
     branches:
-      - main  # Adjust this to your default branch name if it's different (e.g., master)
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: test  # Specify the correct environment here
+    environment: main
 
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
-    - name: Set up SSH key for authentication
-      uses: webfactory/ssh-agent@v0.5.3
-      with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Set up SSH key for authentication
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    - name: Debug SSH details
-      run: |
-        echo "SSH_USER: ${{ secrets.SSH_USER }}"
-        echo "SERVER_IP: ${{ secrets.SERVER_IP }}"
+      - name: Run Deployment on Desktop
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "GITHUB_REPOSITORY='${{ github.repository }}' bash -s" << 'EOF'
+            set -e
 
-    - name: Generate .env file with all GitHub Actions environment variables
-      run: |
-        echo "Generating .env file with all environment variables"
-        # Create .env file
-        echo "Generating .env file from GitHub Actions environment variables"
+            REPO_NAME=$(basename "${GITHUB_REPOSITORY}")
 
-        # Loop over all environment variables and write them to the .env file
-        for var in $(printenv | cut -d= -f1); do
-          echo "$var=${!var}" >> .env
-        done
+            cd /home/${{ secrets.SSH_USER }}/Desktop
 
-        # Print the .env file (for debugging purposes)
-        cat .env
+            mkdir -p ~/.ssh
+            ssh-keyscan github.com >> ~/.ssh/known_hosts
 
-    - name: Run Deployment on Desktop
-      run: |
-        # Extract the repository name dynamically
-        REPO_NAME=$(basename $GITHUB_REPOSITORY)
+            if [ ! -d "$REPO_NAME" ]; then
+              echo "Cloning repository via SSH..."
+              git clone git@github.com:${GITHUB_REPOSITORY}.git "$REPO_NAME"
+            fi
 
-        # SSH into the local desktop and deploy the application
-        ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << EOF
-          # Navigate to the Desktop folder
-          cd /home/${{ secrets.SSH_USER }}/Desktop || exit 1
+            cd "$REPO_NAME"
 
-          # If the directory for the repository does not exist, clone the repo
-          if [ ! -d "$REPO_NAME" ]; then
-            echo "Cloning repository..."
-            git clone https://github.com/$GITHUB_REPOSITORY.git $REPO_NAME || exit 1
-          fi
+            git remote set-url origin git@github.com:${GITHUB_REPOSITORY}.git
 
-          # Change into the repository directory
-          cd /home/${{ secrets.SSH_USER }}/Desktop/$REPO_NAME || exit 1
+            if [ ! -d ".git" ]; then
+              echo "Not a Git repository. Aborting."
+              exit 1
+            fi
 
-          # Move the generated .env file to the correct directory
-          echo "$(< .env)" > .env
+            echo "Pulling latest changes"
+            git pull origin main
 
-          # Print the .env file (for debugging purposes, remove this in production)
-          cat .env
+            echo "Creating .env file from GitHub secret"
+            echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
 
-          # Ensure we're in a Git repository before trying to pull
-          if [ ! -d ".git" ]; then
-            echo "Not a Git repository. Please check if the repository is cloned correctly."
-            exit 1
-          fi
+            echo "Updating Docker services"
+            docker compose pull
+            docker compose up -d --remove-orphans
 
-          # Pull the latest changes from the repo
-          git pull origin main || exit 1
-
-          # Pull the latest Docker images
-          docker compose pull || exit 1
-
-          # Restart the services
-          docker compose up -d --remove-orphans || exit 1
-
-          # Clean up unused Docker images
-          docker system prune -f || exit 1
-        EOF
+            echo "Cleaning up unused Docker images"
+            docker system prune -f
+          EOF

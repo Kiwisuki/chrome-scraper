@@ -1,3 +1,7 @@
+networks:
+  web:
+    external: true
+
 services:
   scraping_service:
     build:
@@ -7,3 +11,11 @@ services:
       - "8000:8000"
     environment:
       - CONCURRENCY_LIMIT=5
+    networks:
+      - web
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.adguard.rule: Host(`adguard.kiwisaki.com`)
+      traefik.http.routers.adguard.entrypoints: websecure
+      traefik.http.routers.adguard.tls.certresolver: myresolver
+      traefik.http.services.adguard.loadbalancer.server.port: 8000
