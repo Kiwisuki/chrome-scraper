@@ -28,7 +28,7 @@ async def restart_driver_periodically(app: FastAPI) -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     """Manage resources during the lifespan of the application."""
-    task = asyncio.create_task(restart_driver_periodically())
+    task = asyncio.create_task(restart_driver_periodically(app))
     try:
         yield
     finally:
@@ -36,5 +36,5 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
         task.cancel()
         with suppress(asyncio.CancelledError):
             await task
-        app.driver_client.close()
+        await app.driver_client.close()
         LOGGER.info("Driver quit.")
